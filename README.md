@@ -9,6 +9,7 @@ Algorithm
 2. The system gets the densities of ratings for the given movie.
 3. System gets the ratings with the highest and lowest densities.
 4. If the difference between the density of highest or lowest density rating and mean of densities of the other four intervals is greater than a threshold, the rating may have cheaters present.
+
 		Foreach(member of potential cheaters rating(s))
 		{
 		If(CheaterDetected is not empty)
