@@ -3,6 +3,8 @@ cognition
 
 Cognition is a data mining tool which mines a specific dataset and identifies patterns in them based on multiple criteria.
 
+It works on MovieLens dataset (http://grouplens.org/datasets/movielens/) and identifies the cheaters in the dataset i.e. users who intentionally give ratings in specific intervals to manipulate ratings of movies. i.e. to delibrately bring up or down average rating of a movie or movies.
+
 Algorithm
 =========
 
