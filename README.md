@@ -9,19 +9,19 @@ Algorithm
 2. The system gets the densities of ratings for the given movie.
 3. System gets the ratings with the highest and lowest densities.
 4. If the difference between the density of highest or lowest density rating and mean of densities of the other four intervals is greater than a threshold, the rating may have cheaters present.
-5. Foreach(member of potential cheaters rating(s))
-{
-a. If(CheaterDetected is not empty)
-{
-Calculate probability of current member being a cheater using Naive Bayes classification.
-If(probability > threshold value)
-{
-Process for cheater detection.
-}
-else
-{
-Go to next member.
-}
+		Foreach(member of potential cheaters rating(s))
+		{
+		If(CheaterDetected is not empty)
+		{
+		Calculate probability of current member being a cheater using Naive Bayes classification.
+		If(probability > threshold value)
+		{
+		Process for cheater detection.
+		}
+		else
+		{
+		Go to next member.
+		}
 
 		Get all the ratings for the current user.
 		risky_intervals = 0.
