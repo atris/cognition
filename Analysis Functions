@@ -1,0 +1,482 @@
+CREATE OR REPLACE FUNCTION DensityPlot2(z float8[])
+RETURNS void AS
+$$
+if (sum(!(is.na(z))) > 1) {
+d <- density(z) # returns the density data
+png(filename="/tmp/test_plot.png")
+print({
+plot(d)
+title(xlab="Density", col.lab=rgb(0,0.5,0))
+title(ylab="Value", col.lab=rgb(0,0.5,0))
+title(main="TestPlot", col.main="red", font.main=4)
+})
+dev.off()
+}
+$$ LANGUAGE plr;
+
+
+
+CREATE OR REPLACE FUNCTION HistPlot2(z float8[])
+RETURNS void AS
+$$
+if (sum(!(is.na(z))) > 1) {
+d <- hist(z) # returns the density data
+png(filename="/tmp/histplot1.png")
+print({
+plot(hist(z))
+title(xlab="Hist", col.lab=rgb(0,0.5,0))
+title(ylab="Value", col.lab=rgb(0,0.5,0))
+title(main="TestPlot", col.main="red", font.main=4)
+})
+dev.off()
+}
+$$ LANGUAGE plr;
+
+
+SELECT user_id FROM rating_info WHERE count(rating) = (SELECT MAX(rate_count) FROM (SELECT COUNT(rating) as rate_count FROM rating_info GROUP BY user_id)t)
+
+
+
+
+CREATE OR REPLACE FUNCTION FreqCalc(z float8[])
+RETURNS float AS
+$$
+
+#d = table(z)  returns the density data
+d <- table(z) # returns the density data
+#d <- c(3.5,4.5,5.5);
+minval <- min(d)
+sum_val <- sum(d)
+divi_val = minval / sum_val
+return(divi_val)
+
+$$ LANGUAGE plr;
+
+CREATE OR REPLACE FUNCTION FreqCalc3(z float8[])
+RETURNS float AS
+$$
+
+#d = table(z)  returns the density data
+d <- table(z) # returns the density data
+#d <- c(3.5,4.5,5.5);
+minval <- min(d)
+sum_val <- sum(d)
+divi_val <- prop.table(d)
+print("Test print")
+return(divi_val)
+
+$$ LANGUAGE plr;
+
+
+CREATE OR REPLACE FUNCTION OutlierDetectByAver(z float8[])
+RETURNS void AS
+$$
+
+counters_list <- rep(1, 5)
+i <- 1
+list1 <- rep(NA, length(z))
+list2 <- rep(NA, length(z))
+list3 <- rep(NA, length(z))
+list4 <- rep(NA, length(z))
+list5 <- rep(NA, length(z))
+while(i <= length(z)){
+	if(z[i] == 1){
+		list1[counters_list[1]] <- z[i]
+		counters_list[1] <- counters_list[1] + 1
+	}
+	
+	if(z[i] == 2){
+		list2[counters_list[2]] <- z[i]
+		counters_list[2] <- counters_list[2] + 1
+	}
+
+	if(z[i] == 3){
+		list3[counters_list[3]] <- z[i]
+		counters_list[3] <- counters_list[3] + 1
+	}
+
+	if(z[i] == 4){
+		list4[counters_list[4]] <- z[i]
+		counters_list[4] <- counters_list[4] + 1
+	}
+
+	if(z[i] == 5){
+		list5[counters_list[5]] <- z[i]
+		counters_list[5] <- counters_list[5] + 1
+	}
+
+i <- i+1
+}
+
+conc_list <- list(list1=list1,list2=list2,list3=list3,list4=list4,list5=list5)
+tab1 <- table(z)
+protab1 <- prop.table(tab1)
+min_density = min(protab1)
+min_density_loc <- which(protab1 == min(protab1))
+min_density_list <- conc_list[min_density_loc]
+
+sum_remaining_dens <- sum(protab1) - min_density
+
+
+avg_dens_remaining <- sum_remaining_dens / 4
+
+if((avg_dens_remaining - min_density) >= 0.1){
+	print("There may be cheaters in min interval")
+	print(conc_list[min_density_loc])
+	print("counter value is")
+	print(counters_list[min_density_loc])
+}
+
+if((avg_dens_remaining - min_density) < 0.1)
+{
+	print("There may not be cheaters in min interval")
+}
+
+print(min_density_loc)
+print(min_density)
+print(avg_dens_remaining)
+
+$$ LANGUAGE plr;
+
+
+CREATE OR REPLACE FUNCTION OutlierDetectMinByAver2(z float8[])
+RETURNS int AS
+$$
+
+counters_list <- rep(1, 5)
+i <- 1
+list1 <- rep(NA, length(z))
+list2 <- rep(NA, length(z))
+list3 <- rep(NA, length(z))
+list4 <- rep(NA, length(z))
+list5 <- rep(NA, length(z))
+while(i <= length(z)){
+	if(z[i] == 1){
+		list1[counters_list[1]] <- z[i]
+		counters_list[1] <- counters_list[1] + 1
+	}
+	
+	if(z[i] == 2){
+		list2[counters_list[2]] <- z[i]
+		counters_list[2] <- counters_list[2] + 1
+	}
+
+	if(z[i] == 3){
+		list3[counters_list[3]] <- z[i]
+		counters_list[3] <- counters_list[3] + 1
+	}
+
+	if(z[i] == 4){
+		list4[counters_list[4]] <- z[i]
+		counters_list[4] <- counters_list[4] + 1
+	}
+
+	if(z[i] == 5){
+		list5[counters_list[5]] <- z[i]
+		counters_list[5] <- counters_list[5] + 1
+	}
+
+i <- i+1
+}
+
+conc_list <- list(list1=list1,list2=list2,list3=list3,list4=list4,list5=list5)
+tab1 <- table(z)
+protab1 <- prop.table(tab1)
+min_density = min(protab1)
+min_density_loc <- which(protab1 == min(protab1))
+min_density_list <- conc_list[min_density_loc]
+
+sum_remaining_densmin <- sum(protab1) - min_density
+
+avg_dens_remaining <- sum_remaining_densmin / 4
+
+if((avg_dens_remaining - min_density) >= 0.1){
+	print("There may be cheaters in min interval")
+	return (1)
+}
+
+if((avg_dens_remaining - min_density) < 0.1)
+{
+	print("There may not be cheaters in min interval")
+	return (0)
+}
+
+print(min_density_loc)
+print(min_density)
+print(avg_dens_remaining)
+$$ LANGUAGE plr;
+
+
+CREATE OR REPLACE FUNCTION CheaterDetectAver2(z float8[])
+RETURNS int AS
+$$
+
+tab1 <- table(z)
+flag_cheater <- 0
+protab1 <- prop.table(tab1)
+i <- 1
+
+while(i<= 5){
+	
+	current_dens <- protab1[i]
+	
+		if(is.na(current_dens)){
+			flag_cheater <- 1
+		}else{
+			avg_density <- (mean(protab1) - (current_dens / 4))
+			if((current_dens - avg_density) > 0.2 && (current_dens - avg_density) > 0){
+			print("Marking as cheater")
+			print(avg_density)
+			print(current_dens)
+			flag_cheater <- 1
+			}
+
+		}
+	
+	i <- i + 1
+}
+
+if(flag_cheater == 1){
+	print("Cheater")
+	return (1)
+}else{
+	print("Not cheater")
+	return (0)
+}
+
+$$ LANGUAGE plr;
+
+CREATE OR REPLACE FUNCTION ThresholdCalc(z int[])
+RETURNS float8[] AS
+$$
+tab1 <- table(z)
+protab1 <- prop.table(tab1)
+
+return (protab1)
+
+$$ LANGUAGE plr;
+
+CREATE OR REPLACE FUNCTION CheaterDetectAver(z float8[], rat_array float8[], threshold_val float8)
+RETURNS int AS
+$$
+
+tab1 <- table(z)
+flag_cheater <- 0
+protab1 <- prop.table(tab1)
+thres_array <- prop.table(table(rat_array))
+i <- 1
+avg_density <- mean(protab1)
+while(i<= 5){
+	current_dens <- protab1[i]
+	
+		if(is.na(current_dens)){
+			flag_cheater <- 1
+		}else if((thres_array[i]- current_dens) > threshold_val){
+			print("Marking as cheater")
+			flag_cheater <- 1
+		}
+
+	print(thres_array[i])
+	print(current_dens)
+	i <- i + 1
+}
+
+if(flag_cheater == 1){
+	print("Cheater")
+	return (1)
+}else{
+	print("Not cheater")
+	return (0)
+}
+
+$$ LANGUAGE plr;
+
+CREATE OR REPLACE FUNCTION SumValues1(z)
+RETURNS int4 AS
+$$
+d <- sum(!(is.na(arg1$rating)))
+return (d)
+$$ LANGUAGE plr;
+
+
+CREATE OR REPLACE FUNCTION CheaterDetectAver3(z float8[], rat_array float8[], threshold_val float8)
+RETURNS int AS
+$$
+
+tab1 <- table(z)
+ris_interval <- 0
+protab1 <- prop.table(tab1)
+thres_array <- prop.table(table(rat_array))
+i <- 1
+while(i<= 5){
+	current_dens <- protab1[i]
+	avg_density <- (mean(protab1) - (current_dens / 4))
+	
+		if(is.na(current_dens)){
+			ris_interval <- ris_interval + 1
+		}else if((thres_array[i]- current_dens) > threshold_val){
+			print("Marking as cheater")
+			ris_interval <- ris_interval + 1
+		}
+		else{
+			if((current_dens - avg_density) > 0.2 && (current_dens - avg_density) > 0){
+				print("Marking as cheater2")
+				print(avg_density)
+				print(current_dens)
+				ris_interval <- ris_interval + 1
+			}
+
+		}
+
+	print(thres_array[i])
+	print(current_dens)
+	i <- i + 1
+}
+
+if((5 - ris_interval) < ris_interval){
+	print("Cheater", ris_interval)
+	print(ris_interval)
+	return (1)
+}else{
+	print("Not cheater")
+	print(ris_interval)
+	return (0)
+}
+
+$$ LANGUAGE plr;
+
+CREATE OR REPLACE FUNCTION MovieDetect(z float8[], a float8[], threshold_val float8)
+RETURNS int AS
+$$
+
+a <- Reduce(intersect, list(z,a))
+count1 <- length(a)
+if(count1 > threshold_val){
+	print("Value above threshold")
+	return (1)
+}else{
+	print("Value below threshold")
+	return (0)
+}
+
+$$ LANGUAGE plr;
+
+
+CREATE OR REPLACE FUNCTION OutlierDetectMaxByAver2(z float8[])
+RETURNS int AS
+$$
+
+counters_list <- rep(1, 5)
+i <- 1
+list1 <- rep(NA, length(z))
+list2 <- rep(NA, length(z))
+list3 <- rep(NA, length(z))
+list4 <- rep(NA, length(z))
+list5 <- rep(NA, length(z))
+while(i <= length(z)){
+	if(z[i] == 1){
+		list1[counters_list[1]] <- z[i]
+		counters_list[1] <- counters_list[1] + 1
+	}
+	
+	if(z[i] == 2){
+		list2[counters_list[2]] <- z[i]
+		counters_list[2] <- counters_list[2] + 1
+	}
+
+	if(z[i] == 3){
+		list3[counters_list[3]] <- z[i]
+		counters_list[3] <- counters_list[3] + 1
+	}
+
+	if(z[i] == 4){
+		list4[counters_list[4]] <- z[i]
+		counters_list[4] <- counters_list[4] + 1
+	}
+
+	if(z[i] == 5){
+		list5[counters_list[5]] <- z[i]
+		counters_list[5] <- counters_list[5] + 1
+	}
+
+i <- i+1
+}
+
+conc_list <- list(list1=list1,list2=list2,list3=list3,list4=list4,list5=list5)
+tab1 <- table(z)
+protab1 <- prop.table(tab1)
+max_density = max(protab1)
+max_density_loc <- which(protab1 == max(protab1))
+max_density_list <- conc_list[max_density_loc]
+
+avg_remaining_densmax <- mean(protab1) - (max_density / 4)
+
+
+if((avg_remaining_densmax - max_density) >= 0.1){
+	print("There may be cheaters in max interval")
+	return (1)
+}
+
+if((avg_remaining_densmax - max_density) < 0.1){
+	print("There may not be cheaters in max interval")
+	return (0)
+}
+
+
+print(max_density_loc)
+print(max_density)
+print(avg_remaining_densmax)
+$$ LANGUAGE plr;
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION CalculateProbability2(age_arr int[], occupation_arr int[], age_val int, occupation_val int, threshold_val double precision)
+RETURNS int AS
+$$
+
+if(length(age_arr) == 0 || length(occupation_arr) == 0)
+{
+	print("Value is zero")
+
+	return (-1)
+}
+
+table_age_count <- prop.table(table(age_arr))
+table_occupation_count <- prop.table(table(occupation_arr))
+
+age_count <- table_age_count[names(table_age_count) == age_val]
+occupation_count <- table_occupation_count[names(table_occupation_count) == occupation_val]
+
+total_prob <- age_count * occupation_count
+
+if(length(total_prob) > 0){
+	if(total_prob >= threshold_val){
+		print("Probable cheater")
+		print(age_count)
+		print(occupation_count)
+		print(total_prob)
+
+		return (1)
+	}else{
+		print("Not probable cheater")
+		print(age_count)
+		print(occupation_count)
+		print(total_prob)
+
+		return (0)
+	}
+}else{
+	print("Values 0")
+	print(age_count)
+	print(occupation_count)
+	print(total_prob)
+
+	return (-1)
+}
+$$ LANGUAGE plr;
+
+
+

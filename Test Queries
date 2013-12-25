@@ -1,0 +1,24 @@
+select user_id, count(*) from rating_info group by user_id order by 2 desc limit 10;
+
+Max 10 rating count users
+
+SELECT x-y FROM CAST((SELECT sum(rating)  FROM rating_info) AS INTEGER) AS x ,CAST((SELECT AVG(rating) FROM rating_info) AS INTEGER) AS y;
+
+SELECT * FROM info_movies WHERE movie_id IN(SELECT item_id FROM rating_info WHERE user_id IN (SELECT OutlierDetectByAver2(array(SELECT rating FROM rating_info WHERE item_id=50))));
+
+SELECT * FROM user_info WHERE user_id IN(SELECT user_id FROM rating_info WHERE item_id=50 AND rating=(SELECT OutlierDetectByAver2(array(SELECT rating FROM rating_info WHERE item_id=50))));
+
+SELECT CheaterDetectAver2(array(SELECT rating FROM rating_info WHERE user_id=407));
+
+SELECT CheaterDetectAver(array(SELECT rating FROM rating_info WHERE user_id=407),array(SELECT rating FROM rating_info),0.2);
+
+SELECT CalculateProbability2(array(SELECT age FROM user_info WHERE user_id IN(SELECT user_id FROM CheaterDetected)),array(SELECT occupation_id FROM user_info,occupation_info,rating_info WHERE occupation_name=occupation AND rating_info.user_id IN(SELECT user_id FROM CheaterDetected)
+),20,2,0.2);
+
+
+
+
+
+		SELECT CalculateProbability2(array(SELECT age FROM user_info WHERE user_id IN(SELECT user_id FROM CheaterDetected)),array(SELECT occupation_id FROM user_info,occupation_info,rating_info WHERE occupation_name=occupation AND rating_info.user_id IN(SELECT user_id FROM CheaterDetected)
+),(SELECT age FROM user_info WHERE user_id=var_match),(SELECT occupation_id FROM occupation_info,user_info WHERE occupation=occupation_name AND user_id=var_match,0.2) INTO temp_prob;
+

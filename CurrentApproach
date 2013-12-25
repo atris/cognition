@@ -1,0 +1,5 @@
+1) Use density and avg density - density of lowest interval to determine the potential interval of potential cheaters, keeping the assumptions in mind.
+
+2) For each rater in the interval, check the histogram of ratings(all).
+
+3)If uneven distribution(only 1s and 5s), the guy is a cheater.

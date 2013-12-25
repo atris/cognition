@@ -1,0 +1,21 @@
+CREATE OR REPLACE FUNCTION DensityPlot(rating_info)
+ RETURNS void AS
+$$
+ if (sum(!(is.na(arg1$rating))) > 1) {
+ d <- density(arg1$rating) # returns the density data
+ png(filename="/tmp/test_data_plot.png")
+ plot(d)
+ title(xlab="Density", col.lab=rgb(0,0.5,0))
+ title(ylab="Value", col.lab=rgb(0,0.5,0))
+ title(main=heading, col.main="red", font.main=4)
+}
+$$ LANGUAGE plr;
+
+
+CREATE OR REPLACE FUNCTION DensityPlot1(rating_info)
+ RETURNS bool[] AS
+$$
+ temp1 <- !(is.na(arg1$rating))
+ return (temp1)
+}
+$$ LANGUAGE plr;

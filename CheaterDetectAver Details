@@ -1,0 +1,3 @@
+CheaterDetectAver() finds the deviation of the potential cheater's rating density for an interval from that interval's general density, from all the ratings. If the deviation is more than a threshold, the rater is marked as a cheater
+
+CheaterDetectAver2() finds the difference between the rating density of an interval for the potential cheater with the average rating density of the other 4 intervals for the potential cheater. If the difference is more than a threshold, the rater is marked as a cheater. This approach checks if the rating densities for the potential cheater are distributed over majority of the intervals or whether they are concentrated only in a few intervals.

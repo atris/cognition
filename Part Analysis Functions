@@ -1,0 +1,217 @@
+CREATE OR REPLACE FUNCTION CheaterDetectionPart(movie_value integer,threshold_value double precision)
+  RETURNS void AS
+$$
+DECLARE
+    searchsql_max text := '';
+    searchsql_min text := '';
+    var_match int;
+    deb_max text := 'temp_max is greater than 0';
+    deb_min text := 'temp_min is greater than 0';
+    temp_max int;
+    temp_min int;
+    temp_count int;
+    temp_count2 int;
+    temp2 int;
+    temp_prob int;
+BEGIN
+SELECT OutlierDetectMaxByAver2(array(SELECT rating FROM rating_info WHERE item_id=movie_value)) INTO temp_max;
+	    SELECT OutlierDetectMinByAver2(array(SELECT rating FROM rating_info WHERE item_id=movie_value)) INTO temp_min;
+    searchsql_max := 'SELECT user_id FROM rating_info WHERE item_id='||movie_value||'AND rating='||temp_max;
+    searchsql_min := 'SELECT user_id FROM rating_info WHERE item_id='||movie_value||'AND rating='||temp_min;
+
+    IF temp_max > 0 THEN
+	FOR var_match IN EXECUTE(searchsql_max) LOOP
+		SELECT COUNT(*) INTO temp_count FROM CheaterPart WHERE user_id=var_match;
+		IF temp_count == 0 THEN
+			SELECT CalculateProbability2(array(SELECT age FROM user_info WHERE user_id IN(SELECT user_id FROM CheaterPart)),array(SELECT occupation_id FROM user_info,occupation_info,rating_info WHERE occupation_name=occupation AND rating_info.user_id IN(SELECT user_id FROM CheaterPart)
+),(SELECT age FROM user_info WHERE user_id=var_match),(SELECT occupation_id FROM occupation_info,user_info WHERE occupation=occupation_name AND user_id=var_match),0.2) INTO temp_prob;
+
+			IF temp_prob != 0 THEN
+    				IF temp_prob <2 AND temp_prob > 0 THEN
+					
+					INSERT INTO CheaterPart VALUES(var_match);
+			END IF;
+
+		END IF;
+
+		END IF;
+
+	END LOOP;
+
+	END IF;
+
+    IF temp_min > 0 THEN
+	FOR var_match IN EXECUTE(searchsql_min) LOOP
+		SELECT COUNT(*) INTO temp_count2 FROM CheaterPart WHERE user_id=var_match;
+		IF temp_count2 <= 0 THEN
+		SELECT CalculateProbability2(array(SELECT age FROM user_info WHERE user_id IN(SELECT user_id FROM CheaterPart)),array(SELECT occupation_id FROM user_info,occupation_info,rating_info WHERE occupation_name=occupation AND rating_info.user_id IN(SELECT user_id FROM CheaterPart)
+),(SELECT age FROM user_info WHERE user_id=var_match),(SELECT occupation_id FROM occupation_info,user_info WHERE occupation=occupation_name AND user_id=var_match),0.2) INTO temp_prob;
+
+		IF temp_prob != 0 THEN
+    			IF temp_prob < 2 AND temp_prob > 0 THEN
+				INSERT INTO CheaterPart VALUES(var_match);
+
+		END IF;
+
+		END IF;
+
+		END IF;
+
+	END LOOP;
+
+	END IF;
+END;
+$$
+LANGUAGE 'plpgsql' VOLATILE;
+
+
+CREATE OR REPLACE FUNCTION StartCheaterDetectPart(seed_value integer,threshold_value double precision)
+  RETURNS void AS
+$$
+DECLARE
+    result text := '';
+    searchsql text := '';
+    searchsql_max text := '';
+    searchsql_min text := '';
+    searchsql_userid text :='';
+    var_match int;
+    deb_max text := 'temp_max is greater than 0';
+    deb_min text := 'temp_min is greater than 0';
+    query2 text := '';
+    test1 text := '';
+    temp_max int;
+    temp_min int;
+    temp1 int;
+    temp2 int;
+BEGIN
+    	     DROP TABLE IF EXISTS CheaterPart;
+    	     CREATE TABLE CheaterPart(user_id INT PRIMARY KEY);
+
+	    PERFORM CheaterDetectionPart(seed_value,threshold_value);
+	searchsql := 'SELECT item_id FROM rating_info WHERE user_id IN(SELECT user_id FROM CheaterPart)';
+
+     FOR var_match IN EXECUTE(searchsql) LOOP
+    		SELECT MovieDetect(array(SELECT user_id FROM rating_info WHERE item_id=var_match),array(SELECT user_id FROM CheaterPart),0.2) INTO temp1;
+	IF temp1 > 0 THEN
+		PERFORM CheaterDetectionpart(var_match,threshold_value);
+	END IF;
+
+	END LOOP;
+END;
+$$
+LANGUAGE 'plpgsql' VOLATILE;
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION CheaterDetectionPart2(movie_value integer,threshold_value double precision)
+  RETURNS void AS
+$$
+DECLARE
+    searchsql_max text := '';
+    searchsql_min text := '';
+    var_match int;
+    deb_max text := 'temp_max is greater than 0';
+    deb_min text := 'temp_min is greater than 0';
+    temp_max int;
+    temp_min int;
+    temp_count int;
+    temp_count2 int;
+    temp2 int;
+    temp_prob int;
+BEGIN
+SELECT OutlierDetectMaxByAver2(array(SELECT rating FROM rating_info WHERE item_id=movie_value)) INTO temp_max;
+	    SELECT OutlierDetectMinByAver2(array(SELECT rating FROM rating_info WHERE item_id=movie_value)) INTO temp_min;
+    searchsql_max := 'SELECT user_id FROM rating_info WHERE item_id='||movie_value||'AND rating='||temp_max;
+    searchsql_min := 'SELECT user_id FROM rating_info WHERE item_id='||movie_value||'AND rating='||temp_min;
+
+    IF temp_max > 0 THEN
+	FOR var_match IN EXECUTE(searchsql_max) LOOP
+		SELECT COUNT(*) INTO temp_count FROM CheaterDetected WHERE user_id=var_match;
+		IF temp_count == 0 THEN
+			SELECT CalculateProbability2(array(SELECT age FROM user_info WHERE user_id IN(SELECT user_id FROM CheaterDetected)),array(SELECT occupation_id FROM user_info,occupation_info,rating_info WHERE occupation_name=occupation AND rating_info.user_id IN(SELECT user_id FROM CheaterDetected)
+),(SELECT age FROM user_info WHERE user_id=var_match),(SELECT occupation_id FROM occupation_info,user_info WHERE occupation=occupation_name AND user_id=var_match),0.2) INTO temp_prob;
+
+			IF temp_prob != 0 THEN
+    				SELECT CheaterDetectAver3(array(SELECT rating FROM rating_info WHERE user_id=var_match)) INTO temp2;
+				IF temp2 > 0 THEN
+					INSERT INTO CheaterDetected VALUES(var_match);
+				END IF;
+
+			END IF;
+
+		END IF;
+
+	END LOOP;
+
+	END IF;
+
+    IF temp_min > 0 THEN
+	FOR var_match IN EXECUTE(searchsql_min) LOOP
+		SELECT COUNT(*) INTO temp_count2 FROM CheaterDetected WHERE user_id=var_match;
+		IF temp_count2 <= 0 THEN
+		SELECT CalculateProbability2(array(SELECT age FROM user_info WHERE user_id IN(SELECT user_id FROM CheaterDetected)),array(SELECT occupation_id FROM user_info,occupation_info,rating_info WHERE occupation_name=occupation AND rating_info.user_id IN(SELECT user_id FROM CheaterDetected)
+),(SELECT age FROM user_info WHERE user_id=var_match),(SELECT occupation_id FROM occupation_info,user_info WHERE occupation=occupation_name AND user_id=var_match),0.2) INTO temp_prob;
+
+		IF temp_prob != 0 THEN
+    			SELECT CheaterDetectAver2(array(SELECT rating FROM rating_info WHERE user_id=var_match)) INTO temp2;
+			IF temp2 > 0 THEN
+				INSERT INTO CheaterDetected VALUES(var_match);
+			END IF;
+
+		END IF;
+
+		END IF;
+
+	END LOOP;
+
+	END IF;
+END;
+$$
+LANGUAGE 'plpgsql' VOLATILE;
+
+
+
+CREATE OR REPLACE FUNCTION StartCheaterDetectPart2(seed_value integer,threshold_value double precision)
+  RETURNS void AS
+$$
+DECLARE
+    result text := '';
+    searchsql text := '';
+    searchsql_max text := '';
+    searchsql_min text := '';
+    searchsql_userid text :='';
+    var_match int;
+    deb_max text := 'temp_max is greater than 0';
+    deb_min text := 'temp_min is greater than 0';
+    query2 text := '';
+    test1 text := '';
+    temp_max int;
+    temp_min int;
+    temp1 int;
+    temp2 int;
+BEGIN
+    	    DROP TABLE IF EXISTS CheaterDetected;
+	    CREATE TABLE CheaterDetected(user_id INT PRIMARY KEY);
+
+	    PERFORM CheaterDetectionPart2(seed_value,threshold_value);
+	searchsql := 'SELECT item_id FROM rating_info WHERE user_id IN(SELECT user_id FROM CheaterDetected)';
+
+     FOR var_match IN EXECUTE(searchsql) LOOP
+    		SELECT MovieDetect(array(SELECT user_id FROM rating_info WHERE item_id=var_match),array(SELECT user_id FROM CheaterDetected),0.2) INTO temp1;
+	IF temp1 > 0 THEN
+		PERFORM CheaterDetectionPart2(var_match,threshold_value);
+	END IF;
+
+	END LOOP;
+END;
+$$
+LANGUAGE 'plpgsql' VOLATILE;
