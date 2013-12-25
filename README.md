@@ -4,6 +4,7 @@ cognition
 Cognition is a data mining tool which mines a specific dataset and identifies patterns in them based on multiple criteria.
 
 Algorithm
+=========
 
 1. A seed value(starting movie id) is given to the system.
 2. The system gets the densities of ratings for the given movie.
