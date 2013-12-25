@@ -23,20 +23,20 @@ else
 Go to next member.
 }
 
-Get all the ratings for the current user.
-risky_intervals = 0.
-	Foreach(rating in ratings of current user)
-	{
-	if(density of rating > mean of other four ratings 			by a threshold value OR density of rating < average density for that rating)
-	{
-		++risky_interval
-	}
-	}
-	if(risky_interval > (5 – risky_interval))
-	{
-		print(“Cheater”);
-	}
-	else
-	{
-		print(“Not cheater”)
-	}
+		Get all the ratings for the current user.
+		risky_intervals = 0.
+		Foreach(rating in ratings of current user)
+		{
+			if(density of rating > mean of other four ratings 			by a threshold value OR density of rating < average density for that rating)
+			{
+				++risky_interval
+			}
+		}
+		if(risky_interval > (5 – risky_interval))
+		{
+			print(“Cheater”);
+		}
+		else
+		{
+			print(“Not cheater”)
+		}
